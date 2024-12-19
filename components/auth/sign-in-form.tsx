@@ -47,7 +47,8 @@ export const SigninForm = () => {
                 email: values.email,
                 password: values.password,
             });
-            console.log(data, error);
+            console.log(data, "DATA---------")
+            console.log(error, "ERROR---------")
             if (error) {
                 throw error;
             }
