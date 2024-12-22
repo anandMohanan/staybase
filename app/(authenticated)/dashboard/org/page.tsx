@@ -8,11 +8,10 @@ import { PlusCircle, Users } from 'lucide-react'
 import { redirect } from "next/navigation"
 
 export default async function OrganizationsPage() {
-    try {
-        const data = await auth.api.getFullOrganization({
-            headers: await headers()
-        })
-        const tableData = transformToTableOrganizations(data)
+    const data = await auth.api.getFullOrganization({
+        headers: await headers()
+    })
+    const tableData = transformToTableOrganizations(data)
 
     return (
         <div className="container mx-auto py-10">
@@ -23,10 +22,6 @@ export default async function OrganizationsPage() {
                         Manage your organizations and team members.
                     </p>
                 </div>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Create Organization
-                </Button>
             </div>
 
             {data && tableData.length > 0 ? (
@@ -44,9 +39,6 @@ export default async function OrganizationsPage() {
             )}
         </div>
     )
-    } catch (error) {
-        redirect('/dashboard/home')
-    }
 }
 
 
