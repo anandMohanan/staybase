@@ -26,3 +26,15 @@ export const SIGNUPSCHEMA = object({
 });
 
 export type SIGNUPFORMTYPE = z.infer<typeof SIGNUPSCHEMA>;
+
+
+export const CREATEORGSCHEMA = object({
+    name: string({ required_error: "Name is required" })
+        .min(1, "Name is required")
+        .max(32, "Name must be less than 32 characters"),
+    slug: string({ required_error: "Slug is required" })
+        .min(1, "Slug is required")
+        .max(10, "Slug must be less than 10 characters"),
+});
+
+export type CREATEORGFORMTYPE = z.infer<typeof CREATEORGSCHEMA>;

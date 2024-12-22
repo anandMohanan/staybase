@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/sidebar"
 import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
+import { ModeToggle } from "../mode-toggle"
 
 export function NavUser({
     user,

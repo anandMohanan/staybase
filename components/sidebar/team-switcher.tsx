@@ -9,6 +9,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar"
+import { ModeToggleButton } from "../mode-toggle"
 
 export function TeamSwitcher({
     teams,
@@ -19,8 +20,6 @@ export function TeamSwitcher({
         slug: string
     }[]
 }) {
-    const { isMobile } = useSidebar()
-    const [activeTeam, setActiveTeam] = React.useState(teams[0] || { name: "No Organizations", slug: "no-org" })
 
     return (
         <SidebarMenu>
@@ -35,9 +34,13 @@ export function TeamSwitcher({
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-semibold">
-                            {activeTeam.name}
+                            {teams.length > 0 && teams[0].name || "No Organizations"}
+                        </span>
+                        <span className="text-muted-foreground text-xs">
+                            {teams.length > 0 && teams[0].slug || "no-org"}
                         </span>
                     </div>
+                    <ModeToggleButton />
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>

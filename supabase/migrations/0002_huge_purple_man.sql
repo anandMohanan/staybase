@@ -1,0 +1,1 @@
+ALTER TABLE "integrations" ALTER COLUMN "business_id" SET DATA TYPE text;
