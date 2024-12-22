@@ -1,9 +1,8 @@
-"use server"
 import '@shopify/shopify-api/adapters/node';
 import { shopifyApi, LATEST_API_VERSION } from '@shopify/shopify-api';
 
 
-const shopify = shopifyApi({
+export const shopify = shopifyApi({
     apiKey: process.env.SHOPIFY_CLIENT_ID,
     apiSecretKey: process.env.SHOPIFY_CLIENT_SECRET!,
     scopes: [
