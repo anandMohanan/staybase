@@ -1,82 +1,146 @@
+
+import { createShopifyClient } from '@/lib/shopify';
 import { db } from '@/db';
 import { integrations } from '@/db/schema/integration';
 import { auth } from '@/lib/auth';
 import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { secureCache } from '@/lib/redis';
+
+const CUSTOMERS_QUERY = `
+query GetCustomers {
+  customers(first: 50) {
+    edges {
+      node {
+        id
+        firstName
+        lastName
+        email
+        metafields(first: 10) {
+          edges {
+            node {
+              key
+              value
+            }
+          }
+        }
+        allOrders: orders(first: 250) {
+          edges {
+            node {
+              totalPriceSet {
+                shopMoney {
+                  amount
+                }
+              }
+            }
+          }
+        }
+        lastOrder: orders(first: 1, reverse: true) {
+          edges {
+            node {
+              createdAt
+              totalPriceSet {
+                shopMoney {
+                  amount
+                }
+              }
+            }
+          }
+        }
+        recentOrders: orders(first: 10) {
+          edges {
+            node {
+              createdAt
+              totalPriceSet {
+                shopMoney {
+                  amount
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`;
 
 export async function GET(req: Request) {
     try {
-        console.log("GET /api/shopify");
         const organization = await auth.api.listOrganizations({
             headers: await headers()
-        })
+        });
+
+        const cacheKey = `customers:${organization[0].id}`;
+        const cachedData = await secureCache.get(cacheKey);
+        if (cachedData) {
+            console.log("From cache--------------------------------------", cachedData)
+            return NextResponse.json(cachedData);
+        }
+
         const integration = await db.select().from(integrations).where(
             eq(integrations.organizationId, organization[0].id)
         );
 
-        if (!integration || !integration[0].accessToken) {
+        if (integration.length === 0) {
             return NextResponse.json('Shopify not connected', { status: 400 });
         }
 
-        const response = await fetch(
-            `https://${integration[0].shopDomain}/admin/api/2024-01/customers.json`,
-            {
-                headers: {
-                    'X-Shopify-Access-Token': integration[0].accessToken,
-                },
-            }
+        if (integration.length >=0 && !integration[0].accessToken) {
+            return NextResponse.json('Shopify not connected', { status: 400 });
+        }
+
+        const client = createShopifyClient(
+            integration[0].shopDomain,
+            integration[0].accessToken
         );
 
-        const { customers } = await response.json();
+        const { data, errors } = await client.request(CUSTOMERS_QUERY);
 
-        const enrichedCustomers = await Promise.all(
-            customers.map(async (customer: any) => {
-                console.log(customer.id, "--------------------------------------------------------------------------------customer")
-                const ordersResponse = await fetch(
-                    `https://${integration[0].shopDomain}/admin/api/2024-01/customers/${customer.id}/orders.json`,
-                    {
-                        headers: {
-                            'X-Shopify-Access-Token': integration[0].accessToken,
-                        },
-                    }
-                );
-                console.log(ordersResponse, "--------------------------------------------------------------------------------ordersResponse")
+        if (errors) {
+            console.error('GraphQL Errors:', errors);
+            throw new Error('GraphQL query failed');
+        }
 
-                const { orders } = await ordersResponse.json();
-                console.log(orders, "--------------------------------------------------------------------------------orders")
 
-                // Calculate customer metrics
-                const totalSpent = orders.reduce((sum: number, order: any) =>
-                    sum + parseFloat(order.total_price), 0
-                );
+        const enrichedCustomers = data.customers.edges.map((edge: any) => {
+            const customer = edge.node;
+            const recentOrders = customer.recentOrders.edges.map((o: any) => o.node);
+            const lastOrder = customer.lastOrder.edges[0]?.node;
+            const allOrders = customer.allOrders.edges.map((o: any) => o.node);
 
-                const lastOrder = orders[0]; // Orders come sorted by date desc
+            // Calculate total spent from all available orders
+            const totalSpent = allOrders.reduce((sum: number, order: any) =>
+                sum + parseFloat(order.totalPriceSet.shopMoney.amount), 0);
 
-                // Calculate risk score based on various factors
-                const daysSinceLastOrder = lastOrder
-                    ? Math.floor((Date.now() - new Date(lastOrder.created_at).getTime()) / (1000 * 60 * 60 * 24))
-                    : 999;
+            const orderCount = allOrders.length;
 
-                const riskScore = calculateRiskScore({
+            const daysSinceLastOrder = lastOrder
+                ? Math.floor((Date.now() - new Date(lastOrder.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+                : 999;
+
+            return {
+                id: customer.id.split('/').pop(),
+                firstName: customer.firstName,
+                lastName: customer.lastName,
+                email: customer.email,
+                totalSpent,
+                lastOrderDate: lastOrder?.createdAt,
+                orderCount,
+                riskScore: calculateRiskScore({
                     daysSinceLastOrder,
-                    orderCount: orders.length,
+                    orderCount,
                     totalSpent,
-                    averageOrderValue: totalSpent / orders.length
-                });
-
-                return {
-                    id: customer.id,
-                    firstName: customer.first_name,
-                    lastName: customer.last_name,
-                    email: customer.email,
-                    totalSpent,
-                    lastOrderDate: lastOrder?.created_at,
-                    orderCount: orders.length,
-                    riskScore
-                };
-            })
-        );
+                    averageOrderValue: totalSpent / (orderCount || 1)
+                }),
+                recentOrders: recentOrders.map((order: any) => ({
+                    createdAt: order.createdAt,
+                    total: parseFloat(order.totalPriceSet.shopMoney.amount)
+                }))
+            };
+        });
+        await secureCache.set(cacheKey, enrichedCustomers);
 
         return NextResponse.json(enrichedCustomers);
     } catch (error) {

@@ -6,7 +6,7 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { AlertCircle, CheckCircle2, ShoppingBag } from 'lucide-react'
-import { ShopifyIntegrationForm } from './shopify-form'
+import { ShopifyIntegrationFormComponent } from './shopify-form'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import { db } from '@/db'
@@ -15,7 +15,7 @@ import { eq } from 'drizzle-orm'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
-export default async function ShopifyIntegration() {
+const IntegrationPage = async () => {
     const organization = await auth.api.listOrganizations({
         headers: await headers()
     })
@@ -33,30 +33,30 @@ export default async function ShopifyIntegration() {
             </div>
 
             {integrationData.length === 0 && (
-            <Card className="mb-6">
-                <CardHeader>
-                    <CardTitle className="text-2xl">Connect Your Shopify Store</CardTitle>
-                    <CardDescription>
-                        Import your customers and orders automatically from Shopify
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-6">
-                        <div>
-                            <h3 className="text-lg font-semibold mb-3">What you'll get:</h3>
-                            <ul className="space-y-2">
-                                {['Automatic customer sync', 'Order tracking', 'Real-time updates', 'Customer segments'].map((item, index) => (
-                                    <li key={index} className="flex items-center space-x-2">
-                                        <CheckCircle2 className="h-5 w-5 text-green-500" />
-                                        <span>{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                <Card className="mb-6">
+                    <CardHeader>
+                        <CardTitle className="text-2xl">Connect Your Shopify Store</CardTitle>
+                        <CardDescription>
+                            Import your customers and orders automatically from Shopify
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-6">
+                            <div>
+                                <h3 className="text-lg font-semibold mb-3">What you'll get:</h3>
+                                <ul className="space-y-2">
+                                    {['Automatic customer sync', 'Order tracking', 'Real-time updates', 'Customer segments'].map((item, index) => (
+                                        <li key={index} className="flex items-center space-x-2">
+                                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                            <span>{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                    <ShopifyIntegrationForm />
-                </CardContent>
-            </Card>
+                        <ShopifyIntegrationFormComponent />
+                    </CardContent>
+                </Card>
             )}
             {
                 integrationData.length > 0 ? (
@@ -102,4 +102,4 @@ export default async function ShopifyIntegration() {
     )
 }
 
-
+export default IntegrationPage

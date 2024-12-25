@@ -15,9 +15,11 @@ import {
 import {
     AudioWaveform,
     BookOpen,
+    BookUserIcon,
     Bot,
     Building2,
     Command,
+    FileChartLineIcon,
     Frame,
     GalleryVerticalEnd,
     Home,
@@ -25,6 +27,7 @@ import {
     PieChart,
     Settings2,
     SquareTerminal,
+    TentIcon,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { authClient } from "@/lib/auth-client"
@@ -45,15 +48,11 @@ const data = {
         {
             title: "Campaigns",
             url: "/dashboard/campaigns",
-            icon: Bot,
+            icon: TentIcon,
             items: [
                 {
                     title: "Active Campaigns",
-                    url: "/dashboard/customers/active-campaigns",
-                },
-                {
-                    title: "Campaign creation",
-                    url: "/dashboard/customers/campaign-creation",
+                    url: "/dashboard/campaigns/active",
                 },
                 {
                     title: "Templates",
@@ -72,7 +71,7 @@ const data = {
         {
             title: "Customers",
             url: "/dashboard/customers",
-            icon: Bot,
+            icon: BookUserIcon,
             items: [
                 {
                     title: "Customers List",
@@ -84,14 +83,14 @@ const data = {
                 },
                 {
                     title: "Quantum",
-                    url: "#",
+                    url: "/dashboard/customers/quantum",
                 },
             ],
         },
         {
             title: "Analytics",
             url: "/dashboard/analytics",
-            icon: BookOpen,
+            icon: FileChartLineIcon,
             items: [
                 {
                     title: "Retention",
@@ -147,7 +146,13 @@ export const GlobalSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>
 
     return (
         <>
-            <Sidebar collapsible="icon" {...props} variant='floating'>
+            <Sidebar collapsible="icon" {...props} variant='floating'
+                className={cn(
+                    "transition-colors duration-300",
+                    "dark:data-[state=expanded]:bg-zinc-950 dark:data-[state=collapsed]:bg-transparent",
+                    "light:data-[state=expanded]:bg-zinc-100 light:data-[state=collapsed]:bg-transparent"
+                )}
+            >
                 <SidebarHeader>
                     <TeamSwitcher teams={organizations || []} />
                 </SidebarHeader>
@@ -155,7 +160,10 @@ export const GlobalSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>
                     <SidebarGroup>
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <SidebarMenuButton disabled={isDisabled} asChild className={cn(pathname.startsWith('/dashboard/home') && 'bg-black')}>
+                                <SidebarMenuButton disabled={isDisabled} asChild className={cn(
+                                    pathname.startsWith('/dashboard/home') &&
+                                    "bg-zinc-800 text-white dark:bg-zinc-200 dark:text-zinc-900"
+                                )}>
                                     <a href="/dashboard/home">
                                         <Home />
                                         Home
@@ -165,7 +173,10 @@ export const GlobalSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>
                         </SidebarMenu>
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <SidebarMenuButton disabled={isDisabled} asChild className={cn(pathname.startsWith('/dashboard/integrations') && 'bg-black')}>
+                                <SidebarMenuButton disabled={isDisabled} asChild className={cn(
+                                    pathname.startsWith('/dashboard/integrations') &&
+                                    "bg-zinc-800 text-white dark:bg-zinc-200 dark:text-zinc-900"
+                                )}>
                                     <a href="/dashboard/integrations">
                                         <Home />
                                         Integrations
@@ -180,7 +191,10 @@ export const GlobalSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>
                 <SidebarFooter>
                     <SidebarMenu>
                         <SidebarMenuItem>
-                            <SidebarMenuButton disabled={isDisabled} asChild>
+                            <SidebarMenuButton disabled={isDisabled} asChild className={cn(
+                                pathname.startsWith('/dashboard/org') &&
+                                "bg-zinc-800 text-white dark:bg-zinc-200 dark:text-zinc-900"
+                            )}>
                                 <a href="/dashboard/org">
                                     <Building2 />
                                     Organization

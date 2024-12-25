@@ -13,7 +13,7 @@ export default function RiskAnalysisPage() {
     } = useCustomer()
     return (
         <>
-        { customers && <RiskAnalytics customers={customers} />}
+            {customers && <RiskAnalytics customers={customers} />}
         </>
     )
 }

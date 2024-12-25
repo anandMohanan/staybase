@@ -3,6 +3,7 @@ import { integrations } from '@/db/schema/integration';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
@@ -27,6 +28,9 @@ export async function GET(req: Request) {
         const organization = await auth.api.listOrganizations({
             headers: await headers()
         })
+        const webhookSecret = crypto.randomBytes(32).toString('hex');
+
+
 
         await db.insert(integrations)
             .values({
@@ -34,13 +38,20 @@ export async function GET(req: Request) {
                 shopDomain: shop!,
                 status: 'active',
                 platform: 'shopify',
-                organizationId: organization[0].id
+                organizationId: organization[0].id,
+                webhookSecret: webhookSecret
             })
 
 
         return NextResponse.redirect(`${process.env.APP_URL}/dashboard/integrations`);
     } catch (error) {
         console.error('Shopify integration error:', error);
-        return new NextResponse('Integration failed', { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : 'Integration failed';
+        return new NextResponse(errorMessage, {
+            status: 500,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
     }
 }

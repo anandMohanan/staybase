@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     description,
 };
 
-const App = async () => {
+const AuthLanding = async () => {
     const data = await auth.api.listOrganizations({
         headers: await headers()
     })
@@ -58,6 +58,6 @@ const App = async () => {
     redirect('/dashboard/home')
 };
 
-export default App;
+export default AuthLanding;
 
 

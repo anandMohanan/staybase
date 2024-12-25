@@ -24,6 +24,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CustomersResponseSchema } from '@/lib/types/customer';
 import { useCustomer } from '@/hooks/customer';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { CustomerDetailsModal } from './customer-details-modal';
 
 interface Customer {
     id: string;
@@ -86,7 +88,7 @@ export default function CustomersList() {
                 </span>
             );
         }
-        if (riskScore > 30) {
+        if (riskScore > 50) {
             return (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                     Medium Risk
@@ -190,7 +192,21 @@ export default function CustomersList() {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent>
-                                                <DropdownMenuItem>View Details</DropdownMenuItem>
+                                                <DropdownMenuItem>
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="ghost" size="sm">
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                                View Details
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <CustomerDetailsModal
+                                                                customer={customer}
+                                                            />
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </DropdownMenuItem>
                                                 <DropdownMenuItem>Create Campaign</DropdownMenuItem>
                                                 <DropdownMenuItem>Export Data</DropdownMenuItem>
                                             </DropdownMenuContent>

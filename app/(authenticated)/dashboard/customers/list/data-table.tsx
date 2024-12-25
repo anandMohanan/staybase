@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CustomerDetailsModal } from "./customer-details-modal";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 interface Customer {
     id: string;
@@ -30,10 +32,12 @@ interface Customer {
     riskScore: number;
 }
 
-export const DataTable = ({customers}: {customers: Customer[]}) => {
+export const DataTable = ({ customers }: { customers: Customer[] }) => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState('all'); // all, high-risk, active
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const [showDetails, setShowDetails] = useState(false)
 
 
     const filteredCustomers = customers.filter(customer => {
@@ -167,7 +171,27 @@ export const DataTable = ({customers}: {customers: Customer[]}) => {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent>
-                                                <DropdownMenuItem>View Details</DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                >
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="ghost" size="sm">
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                                View Details fsddfsdf
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <CustomerDetailsModal
+                                                                customer={customer}
+                                                                open={true}
+                                                                onClose={() => {
+                                                                    setShowDetails(false);
+                                                                    setSelectedCustomer(null);
+                                                                }}
+                                                            />
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </DropdownMenuItem>
                                                 <DropdownMenuItem>Create Campaign</DropdownMenuItem>
                                                 <DropdownMenuItem>Export Data</DropdownMenuItem>
                                             </DropdownMenuContent>

@@ -3,15 +3,29 @@ import { columns } from "./columns"
 import { DataTable } from "./data-table"
 import { headers } from "next/headers"
 import { transformToTableOrganizations } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { PlusCircle, Users } from 'lucide-react'
-import { redirect } from "next/navigation"
+import { db } from "@/db"
+import { organizationSettings } from "@/db/schema/user"
+import { eq } from "drizzle-orm"
+import { OrganizationSettingsComponent } from "./org-settings"
+import { SettingsFormValues } from "@/lib/types/organization"
 
 export default async function OrganizationsPage() {
     const data = await auth.api.getFullOrganization({
         headers: await headers()
     })
     const tableData = transformToTableOrganizations(data)
+
+
+    const settings = await db.select().from(organizationSettings).where(
+        eq(organizationSettings.organizationId, data?.id!)
+    )
+
+    const updateSettings = async (values: SettingsFormValues) => {
+
+        await db.update(organizationSettings)
+            .set(values)
+            .where(eq(organizationSettings.organizationId, data?.id!))
+    }
 
     return (
         <div className="container mx-auto py-10">
@@ -24,19 +38,14 @@ export default async function OrganizationsPage() {
                 </div>
             </div>
 
-            {data && tableData.length > 0 ? (
+            {data && tableData.length > 0 && (
                 <DataTable columns={columns} data={tableData} />
-            ) : (
-                <div className="flex flex-col items-center justify-center h-[400px] bg-muted rounded-lg">
-                    <Users className="h-10 w-10 text-muted-foreground mb-4" />
-                    <h2 className="text-xl font-semibold mb-2">No Organizations</h2>
-                    <p className="text-muted-foreground mb-4">You haven't created any organizations yet.</p>
-                    <Button>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Create Your First Organization
-                    </Button>
-                </div>
             )}
+
+            <OrganizationSettingsComponent
+                settings={settings}
+                onUpdate={updateSettings}
+            />
         </div>
     )
 }

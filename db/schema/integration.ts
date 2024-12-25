@@ -8,6 +8,7 @@ export const integrations = pgTable('integrations', {
     accessToken: text('access_token').notNull(),
     shopDomain: text('shop_domain').notNull(),
     status: text('status').notNull(),
+    webhookSecret: text('webhook_secret').notNull(),
     lastSync: timestamp('last_sync'),
 }, (table) => ({
     organizationId: index('integrations_organization_idx').on(table.organizationId),

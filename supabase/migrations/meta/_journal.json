@@ -22,6 +22,27 @@
       "when": 1734721205378,
       "tag": "0002_huge_purple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1734949189523,
+      "tag": "0003_volatile_stick",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1735024554918,
+      "tag": "0004_secret_hobgoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1735025114616,
+      "tag": "0005_medical_blade",
+      "breakpoints": true
     }
   ]
 }

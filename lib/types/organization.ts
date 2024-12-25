@@ -37,3 +37,18 @@ export const TableOrganizationSchema = z.object({
 
 export type RawOrganization = z.infer<typeof OrganizationSchema>;
 export type TableOrganization = z.infer<typeof TableOrganizationSchema>;
+
+
+
+export const settingsFormSchema = z.object({
+    automaticCampaigns: z.boolean(),
+    riskThreshold: z.enum(['LOW', 'MEDIUM', 'HIGH']),
+    notificationPreferences: z.object({
+        email: z.boolean(),
+        inApp: z.boolean(),
+        digest: z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'NONE'])
+    }),
+    autoArchiveDays: z.enum(['7', '14', '30', '60', '90'])
+})
+
+export type SettingsFormValues = z.infer<typeof settingsFormSchema>
