@@ -43,6 +43,13 @@
       "when": 1735025114616,
       "tag": "0005_medical_blade",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1735146407387,
+      "tag": "0006_jittery_mercury",
+      "breakpoints": true
     }
   ]
 }

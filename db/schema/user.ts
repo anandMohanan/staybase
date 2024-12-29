@@ -6,6 +6,7 @@ import {
     json,
     varchar,
     integer,
+    decimal,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -134,3 +135,17 @@ export const campaigns = pgTable('campaigns', {
     updatedAt: timestamp('updated_at').notNull(),
     createdAt: timestamp('created_at').notNull(),
 })
+
+
+export const customers = pgTable('customers', {
+    id: text('id').primaryKey(),
+    customerId: text('customer_id').notNull(),
+    email: text('email').notNull(),
+    name: text('name').notNull(),
+    lastOrderDate: timestamp('last_order_date').notNull(),
+    totalOrders: integer('total_orders').notNull(),
+    totalSpent: decimal('total_spent', { precision: 10, scale: 2 }).notNull(),
+    organizationId: text('organization_id').references(() => organization.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull()
+});

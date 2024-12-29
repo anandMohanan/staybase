@@ -7,6 +7,23 @@ import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { secureCache } from '@/lib/redis';
+import { customers } from '@/db/schema/user';
+
+interface EnrichedCustomer {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+    totalSpent: number;
+    lastOrderDate: string | null;
+    orderCount: number;
+    riskScore: number;
+    recentOrders: Array<{
+        createdAt: string;
+        total: number;
+    }>;
+    source: 'shopify' | 'database';
+}
 
 const CUSTOMERS_QUERY = `
 query GetCustomers {
@@ -79,70 +96,95 @@ export async function GET(req: Request) {
             return NextResponse.json(cachedData);
         }
 
+        const dbCustomers = await db
+            .select()
+            .from(customers)
+            .where(eq(customers.organizationId, organization[0].id))
+
+        const enrichedDbCustomers: EnrichedCustomer[] = dbCustomers.map(customer => ({
+            id: customer.customerId,
+            email: customer.email,
+            firstName: customer.name.split(' ')[0],
+            lastName: customer.name.split(' ').slice(1).join(' '),
+            totalSpent: Number(customer.totalSpent),
+            lastOrderDate: customer.lastOrderDate?.toISOString() || null,
+            orderCount: customer.totalOrders,
+            riskScore: calculateRiskScore({
+                daysSinceLastOrder: customer.lastOrderDate
+                    ? Math.floor((Date.now() - new Date(customer.lastOrderDate).getTime()) / (1000 * 60 * 60 * 24))
+                    : 999,
+                orderCount: customer.totalOrders,
+                totalSpent: Number(customer.totalSpent),
+                averageOrderValue: Number(customer.totalSpent) / (customer.totalOrders || 1)
+            }),
+            recentOrders: [], // Database customers might not have recent orders detail
+            source: 'database'
+        }));
+
         const integration = await db.select().from(integrations).where(
             eq(integrations.organizationId, organization[0].id)
         );
 
-        if (integration.length === 0) {
-            return NextResponse.json('Shopify not connected', { status: 400 });
-        }
+        let enrichedShopifyCustomers: EnrichedCustomer[] = [];
 
-        if (integration.length >=0 && !integration[0].accessToken) {
-            return NextResponse.json('Shopify not connected', { status: 400 });
-        }
+        if (integration.length > 0 && integration[0].accessToken) {
+            const client = createShopifyClient(
+                integration[0].shopDomain,
+                integration[0].accessToken
+            );
 
-        const client = createShopifyClient(
-            integration[0].shopDomain,
-            integration[0].accessToken
-        );
+            const { data, errors } = await client.request(CUSTOMERS_QUERY);
 
-        const { data, errors } = await client.request(CUSTOMERS_QUERY);
+            if (errors) {
+                console.error('GraphQL Errors:', errors);
+                throw new Error('GraphQL query failed');
+            }
 
-        if (errors) {
-            console.error('GraphQL Errors:', errors);
-            throw new Error('GraphQL query failed');
-        }
+            enrichedShopifyCustomers = data.customers.edges.map((edge: any) => {
+                const customer = edge.node;
+                const recentOrders = customer.recentOrders.edges.map((o: any) => o.node);
+                const lastOrder = customer.lastOrder.edges[0]?.node;
+                const allOrders = customer.allOrders.edges.map((o: any) => o.node);
 
+                const totalSpent = allOrders.reduce((sum: number, order: any) =>
+                    sum + parseFloat(order.totalPriceSet.shopMoney.amount), 0);
 
-        const enrichedCustomers = data.customers.edges.map((edge: any) => {
-            const customer = edge.node;
-            const recentOrders = customer.recentOrders.edges.map((o: any) => o.node);
-            const lastOrder = customer.lastOrder.edges[0]?.node;
-            const allOrders = customer.allOrders.edges.map((o: any) => o.node);
+                const orderCount = allOrders.length;
 
-            // Calculate total spent from all available orders
-            const totalSpent = allOrders.reduce((sum: number, order: any) =>
-                sum + parseFloat(order.totalPriceSet.shopMoney.amount), 0);
+                const daysSinceLastOrder = lastOrder
+                    ? Math.floor((Date.now() - new Date(lastOrder.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+                    : 999;
 
-            const orderCount = allOrders.length;
-
-            const daysSinceLastOrder = lastOrder
-                ? Math.floor((Date.now() - new Date(lastOrder.createdAt).getTime()) / (1000 * 60 * 60 * 24))
-                : 999;
-
-            return {
-                id: customer.id.split('/').pop(),
-                firstName: customer.firstName,
-                lastName: customer.lastName,
-                email: customer.email,
-                totalSpent,
-                lastOrderDate: lastOrder?.createdAt,
-                orderCount,
-                riskScore: calculateRiskScore({
-                    daysSinceLastOrder,
-                    orderCount,
+                return {
+                    id: customer.id.split('/').pop(),
+                    firstName: customer.firstName,
+                    lastName: customer.lastName,
+                    email: customer.email,
                     totalSpent,
-                    averageOrderValue: totalSpent / (orderCount || 1)
-                }),
-                recentOrders: recentOrders.map((order: any) => ({
-                    createdAt: order.createdAt,
-                    total: parseFloat(order.totalPriceSet.shopMoney.amount)
-                }))
-            };
-        });
-        await secureCache.set(cacheKey, enrichedCustomers);
+                    lastOrderDate: lastOrder?.createdAt || null,
+                    orderCount,
+                    riskScore: calculateRiskScore({
+                        daysSinceLastOrder,
+                        orderCount,
+                        totalSpent,
+                        averageOrderValue: totalSpent / (orderCount || 1)
+                    }),
+                    recentOrders: recentOrders.map((order: any) => ({
+                        createdAt: order.createdAt,
+                        total: parseFloat(order.totalPriceSet.shopMoney.amount)
+                    })),
+                    source: 'shopify' as const
+                };
+            });
+        }
 
-        return NextResponse.json(enrichedCustomers);
+
+        const combinedCustomers = mergeCustomers(enrichedDbCustomers, enrichedShopifyCustomers);
+
+        await secureCache.set(cacheKey, combinedCustomers);
+
+
+        return NextResponse.json(combinedCustomers);
     } catch (error) {
         console.error('Error fetching customers:', error);
         return NextResponse.json('Error fetching customers', { status: 500 });
@@ -168,4 +210,32 @@ function calculateRiskScore({
     const frequencyFactor = Math.max(1 - (orderCount / 10), 0) * 30;
 
     return Math.round(timeFactor + valueFactor + frequencyFactor);
+}
+
+
+function mergeCustomers(dbCustomers: EnrichedCustomer[], shopifyCustomers: EnrichedCustomer[]): EnrichedCustomer[] {
+    const emailMap = new Map<string, EnrichedCustomer>();
+
+    dbCustomers.forEach(customer => {
+        emailMap.set(customer.email.toLowerCase(), customer);
+    });
+
+    shopifyCustomers.forEach(shopifyCustomer => {
+        const email = shopifyCustomer.email.toLowerCase();
+        const existingCustomer = emailMap.get(email);
+
+        if (existingCustomer) {
+            emailMap.set(email, {
+                ...existingCustomer,
+                ...shopifyCustomer,
+                totalSpent: Math.max(existingCustomer.totalSpent, shopifyCustomer.totalSpent),
+                orderCount: Math.max(existingCustomer.orderCount, shopifyCustomer.orderCount),
+                riskScore: Math.min(existingCustomer.riskScore, shopifyCustomer.riskScore)
+            });
+        } else {
+            emailMap.set(email, shopifyCustomer);
+        }
+    });
+
+    return Array.from(emailMap.values());
 }

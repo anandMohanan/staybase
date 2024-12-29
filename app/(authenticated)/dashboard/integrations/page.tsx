@@ -14,6 +14,7 @@ import { integrations } from '@/db/schema/integration'
 import { eq } from 'drizzle-orm'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { CSVUploadComponent } from './manual-csv'
 
 const IntegrationPage = async () => {
     const organization = await auth.api.listOrganizations({
@@ -97,6 +98,7 @@ const IntegrationPage = async () => {
                     </Card>
                 )
             }
+            <CSVUploadComponent />
 
         </div>
     )

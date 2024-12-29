@@ -1,9 +1,9 @@
-import { HomeClient } from './home-client';
+import { HomeClientComponent } from './home-client';
 
 
 const DashboardHome = async () => {
     return (
-        <HomeClient />
+        <HomeClientComponent />
     );
 };
 
