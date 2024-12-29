@@ -13,22 +13,22 @@ export default async function ActiveCampaignsPage() {
         headers: await headers()
     })
 
-    // Fetch active campaigns
-
-    const activeCampaigns = await db.select().from(campaigns).where(
+    const allCampaigns = await db.select().from(campaigns).where(
         eq(campaigns.organizationId, session?.session.activeOrganizationId!)
     )
-    // Calculate summary metrics
+
+
+    const activeCampaigns = allCampaigns.filter(campaign => campaign.status === 'active')
     const totalReach = activeCampaigns.reduce((sum, campaign) => sum + campaign.reachCount, 0)
-    const avgEngagement = activeCampaigns.reduce((sum, campaign) => sum + campaign.engagementRate, 0) / activeCampaigns.length
+    const avgEngagement = activeCampaigns.reduce((sum, campaign) => sum + campaign.engagementRate, 0) / allCampaigns.length
 
     return (
         <div className="container mx-auto py-10">
             <div className="flex items-center justify-between mb-8">
                 <div className="space-y-1">
-                    <h1 className="text-3xl font-bold tracking-tight">Active Campaigns</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Campaigns</h1>
                     <p className="text-muted-foreground">
-                        Monitor and manage your currently running campaigns.
+                        Monitor and manage your campaigns.
                     </p>
                 </div>
                 <CampaignCreationDialog />
@@ -60,8 +60,7 @@ export default async function ActiveCampaignsPage() {
                     </CardContent>
                 </Card>
             </div>
-            <h1>hii</h1>
-            <CampaignTable data={activeCampaigns} columns={columns} />
+            <CampaignTable data={allCampaigns} columns={columns} />
 
         </div>
     )

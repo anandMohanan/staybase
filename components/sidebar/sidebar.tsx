@@ -9,25 +9,18 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    SidebarRail,
     useSidebar,
 } from '@/components/ui/sidebar';
 import {
-    AudioWaveform,
-    BookOpen,
     BookUserIcon,
-    Bot,
     Building2,
-    Command,
     FileChartLineIcon,
     Frame,
-    GalleryVerticalEnd,
     Home,
-    Map,
+    MapIcon,
     PieChart,
-    Settings2,
-    SquareTerminal,
     TentIcon,
+    ToyBrickIcon,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { authClient } from "@/lib/auth-client"
@@ -35,7 +28,6 @@ import { NavUser } from './nav-user';
 import { NavProjects } from './nav-projects';
 import { NavMain } from './nav-main';
 import { TeamSwitcher } from './team-switcher';
-import { ModeToggleButton } from '../mode-toggle';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -51,16 +43,8 @@ const data = {
             icon: TentIcon,
             items: [
                 {
-                    title: "Active Campaigns",
+                    title: "Campaigns List",
                     url: "/dashboard/campaigns/active",
-                },
-                {
-                    title: "Templates",
-                    url: "/dashboard/campaigns/templates",
-                },
-                {
-                    title: "Campaigns list",
-                    url: "/dashboard/campaigns/list",
                 },
                 {
                     title: "Performance",
@@ -80,11 +64,7 @@ const data = {
                 {
                     title: "Risk Analysis",
                     url: "/dashboard/customers/risk-analysis",
-                },
-                {
-                    title: "Quantum",
-                    url: "/dashboard/customers/quantum",
-                },
+                }
             ],
         },
         {
@@ -93,23 +73,15 @@ const data = {
             icon: FileChartLineIcon,
             items: [
                 {
-                    title: "Retention",
-                    url: "/dashboard/analytics/retention",
-                },
-                {
-                    title: "Campaign Performance",
-                    url: "/dashboard/analytics/campaign-performance",
-                },
-                {
-                    title: "Customer behavior",
-                    url: "/dashboard/analytics/customer-behavior",
+                    title: "Customer Insights", // Combines behavior & retention
+                    url: "/dashboard/analytics/customer-insights",
                 },
                 {
                     title: "ROI Analysis",
                     url: "/dashboard/analytics/roi-analysis",
-                },
+                }
             ],
-        },
+        }
     ],
     projects: [
         {
@@ -125,7 +97,7 @@ const data = {
         {
             name: "Travel",
             url: "#",
-            icon: Map
+            icon: MapIcon
         },
     ],
 }
@@ -149,7 +121,7 @@ export const GlobalSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>
             <Sidebar collapsible="icon" {...props} variant='floating'
                 className={cn(
                     "transition-colors duration-300",
-                    "dark:data-[state=expanded]:bg-zinc-950 dark:data-[state=collapsed]:bg-transparent",
+                    "dark:data-[state=expanded]:bg-black dark:data-[state=collapsed]:bg-transparent",
                     "light:data-[state=expanded]:bg-zinc-100 light:data-[state=collapsed]:bg-transparent"
                 )}
             >
@@ -178,7 +150,7 @@ export const GlobalSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>
                                     "bg-zinc-800 text-white dark:bg-zinc-200 dark:text-zinc-900"
                                 )}>
                                     <a href="/dashboard/integrations">
-                                        <Home />
+                                        <ToyBrickIcon />
                                         Integrations
                                     </a>
                                 </SidebarMenuButton>

@@ -54,6 +54,15 @@ export const SigninForm = () => {
             }
         },
         onError(error, variables, context) {
+            console.log(error, "ERROR")
+            if (error.status === 500) {
+                toast({
+                    title: "Server Error",
+                    description: "Please check your internet connection or try again later.",
+                    variant: "default",
+                });
+                return;
+            }
             toast({
                 title: error.message,
                 description: "Please try again.",

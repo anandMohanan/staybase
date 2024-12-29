@@ -2,9 +2,9 @@
 import { db } from "@/db"
 import { customers } from "@/db/schema/user"
 import { auth } from "@/lib/auth"
+import type { ProcessedCustomerData, RawCustomerData, UploadResponse } from '@/lib/types/customer'
 import { headers } from "next/headers"
 import { v4 as uuidv4 } from 'uuid'
-import { RawCustomerData, ProcessedCustomerData, UploadResponse } from '@/lib/types/customer'
 
 export const UploadCustomer = async ({
     customerData
@@ -31,7 +31,7 @@ export const UploadCustomer = async ({
                     throw new Error('Invalid date format')
                 }
 
-                if (isNaN(lastOrderDate.getTime())) {
+                if (Number.isNaN(lastOrderDate.getTime())) {
                     throw new Error('Invalid date')
                 }
             } catch (error) {
@@ -42,7 +42,7 @@ export const UploadCustomer = async ({
             const totalOrders = Number(customer.total_orders)
             const totalSpent = Number(customer.total_spent)
 
-            if (isNaN(totalOrders) || isNaN(totalSpent)) {
+            if (Number.isNaN(totalOrders) || Number.isNaN(totalSpent)) {
                 throw new Error(`Invalid numeric values for customer ${customer.email}`)
             }
 
