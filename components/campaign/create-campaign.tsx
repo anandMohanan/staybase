@@ -93,11 +93,11 @@ export const CampaignCreationDialog = () => {
 	const { mutate: mutateCampaign, isPending: createCampaignPending } =
 		useMutation({
 			mutationFn: async (values: CampaignFormValues) => {
-                console.log(values)
+				console.log(values);
 				const response = await createCampaign(values);
 				if (!response.success) throw new Error(response.message);
 				setOpen(false);
-                form.reset()
+				form.reset();
 			},
 			onError(error, variables, context) {
 				console.log(error, "ERROR");

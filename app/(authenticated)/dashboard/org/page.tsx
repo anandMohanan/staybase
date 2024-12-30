@@ -24,8 +24,7 @@ export default async function OrganizationsPage() {
 		.select()
 		.from(organizationSettings)
 		.where(eq(organizationSettings.organizationId, data?.id));
-        console.log("Settings:", settings);
-
+	console.log("Settings:", settings);
 
 	return (
 		<div className="container mx-auto py-10">
@@ -42,9 +41,7 @@ export default async function OrganizationsPage() {
 				<DataTable columns={columns} data={tableData} />
 			)}
 
-			<OrganizationSettingsComponent
-				settings={settings}
-			/>
+			<OrganizationSettingsComponent settings={settings[0]} />
 		</div>
 	);
 }

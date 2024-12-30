@@ -30,7 +30,7 @@ export const columns: ColumnDef<CampaignColumn>[] = [
 						"font-medium",
 						value === "HIGH_RISK" && "text-red-500",
 						value === "LOW_RISK" && "text-green-500",
-                        value === "MEDIUM_RISK" && "text-yellow-500",
+						value === "MEDIUM_RISK" && "text-yellow-500",
 					)}
 				>
 					{value}

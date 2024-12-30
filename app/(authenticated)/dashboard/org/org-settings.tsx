@@ -45,7 +45,7 @@ export const OrganizationSettingsComponent = ({
 }: {
 	settings: OrganizationSettingsType;
 }) => {
-    console.log("Settings:", settings);
+	console.log("Settings:", settings);
 	const form = useForm<SettingsFormValues>({
 		resolver: zodResolver(settingsFormSchema),
 		mode: "onSubmit",
