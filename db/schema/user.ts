@@ -150,3 +150,30 @@ export const customers = pgTable("customers", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+
+export const campaignEmails = pgTable("campaign_emails", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  campaignId: varchar("campaign_id", { length: 255 })
+    .notNull()
+    .references(() => campaigns.id),
+  customerEmail: varchar("customer_email", { length: 255 }).notNull(),
+  emailType: varchar("email_type", { length: 50 }).notNull(), // initial, followup, reminder
+  content: text("content").notNull(),
+  status: varchar("status", { length: 50 }).notNull().default("PENDING"), // PENDING, SENT, FAILED
+  scheduledFor: timestamp("scheduled_for").notNull(),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const emailEvents = pgTable("email_events", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  emailId: varchar("email_id", { length: 255 })
+    .notNull()
+    .references(() => campaignEmails.id),
+  eventType: varchar("event_type", { length: 50 }).notNull(), // delivered, opened, clicked, bounced, complained
+  metadata: jsonb("metadata").default({}),
+  occurredAt: timestamp("occurred_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});

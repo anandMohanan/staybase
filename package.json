@@ -29,6 +29,7 @@
         "@shopify/shopify-api": "^11.6.1",
         "@tanstack/react-query": "^5.62.8",
         "@tanstack/react-table": "^8.20.6",
+        "@trigger.dev/sdk": "^3.3.7",
         "better-auth": "^1.0.22",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -55,6 +56,7 @@
     "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@eslint/eslintrc": "^3",
+        "@trigger.dev/build": "^3.3.7",
         "@types/node": "^20",
         "@types/react": "^19",
         "@types/react-dom": "^19",
