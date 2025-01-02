@@ -1,6 +1,6 @@
 "use server"
 import { db } from "@/db"
-import { customers } from "@/db/schema/user"
+import { CUSTOMERS_TABLE } from "@/db/schema/campaign"
 import { auth } from "@/lib/auth"
 import type { ProcessedCustomerData, RawCustomerData, UploadResponse } from '@/lib/types/customer'
 import { headers } from "next/headers"
@@ -57,7 +57,7 @@ export const UploadCustomer = async ({
             }
         })
 
-        await db.insert(customers).values(customersToInsert)
+        await db.insert(CUSTOMERS_TABLE).values(customersToInsert)
         return {
             success: true,
             message: 'Customers uploaded successfully'

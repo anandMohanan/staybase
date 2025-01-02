@@ -6,30 +6,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button} from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
     Card,
     CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { SIGNINFORMTYPE, SIGNINSCHEMA } from "@/lib/types/auth";
+import { type SIGNINFORMTYPE, SIGNINSCHEMA } from "@/lib/types/auth";
 
 export const SigninForm = () => {
     const form = useForm<SIGNINFORMTYPE>({
@@ -47,8 +40,6 @@ export const SigninForm = () => {
                 email: values.email,
                 password: values.password,
             });
-            console.log(data, "DATA---------")
-            console.log(error, "ERROR---------")
             if (error) {
                 throw error;
             }

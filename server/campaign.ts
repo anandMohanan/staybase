@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { campaigns } from "@/db/schema/user";
+import { CAMPAIGNS_TABLE } from "@/db/schema/campaign";
 import { auth } from "@/lib/auth";
 import type { CampaignFormValues } from "@/lib/types/campaign";
 import { revalidatePath } from "next/cache";
@@ -16,7 +16,7 @@ export const createCampaign = async (campaignData: CampaignFormValues) => {
 			headers: await headers(),
 		});
 		const organizationId = organization?.[0]?.id;
-		await db.insert(campaigns).values({
+		await db.insert(CAMPAIGNS_TABLE).values({
 			id: uuidv4(),
 			name: campaignData.name,
 			status: "ACTIVE",

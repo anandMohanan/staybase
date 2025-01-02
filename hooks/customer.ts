@@ -20,6 +20,7 @@ export const useCustomer = () => {
                 }
                 return parsedData.data;
             } catch (error) {
+                console.error('Error fetching customers:', error);
                 throw error;
             }
         },

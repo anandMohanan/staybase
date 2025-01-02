@@ -17,7 +17,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { SIGNUPFORMTYPE, SIGNUPSCHEMA } from "@/lib/types/auth";
+import { type SIGNUPFORMTYPE, SIGNUPSCHEMA } from "@/lib/types/auth";
 import { authClient } from "@/lib/auth-client";
 
 export const SignupForm = () => {

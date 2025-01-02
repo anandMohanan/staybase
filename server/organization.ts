@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { organizationSettings } from "@/db/schema/user";
+import { ORGANIZATION_SETTINGS_TABLE } from "@/db/schema/organization";
 import { auth } from "@/lib/auth";
 import type { SettingsFormValues } from "@/lib/types/organization";
 import { headers } from "next/headers";
@@ -20,12 +20,12 @@ export const updateOrganizationSettings = async (
         console.log("Settings:", settings);
         const alreadyExists = await db
             .select()
-            .from(organizationSettings)
-            .where(eq(organizationSettings.organizationId, organizationId));
+            .from(ORGANIZATION_SETTINGS_TABLE)
+            .where(eq(ORGANIZATION_SETTINGS_TABLE.organizationId, organizationId));
         if (alreadyExists.length > 0) {
             console.log("Already exists");
             await db
-                .update(organizationSettings)
+                .update(ORGANIZATION_SETTINGS_TABLE)
                 .set({
                     automaticCampaigns: settings.automaticCampaigns,
                     riskThreshold: settings.riskThreshold,
@@ -39,14 +39,14 @@ export const updateOrganizationSettings = async (
                     excludeDiscountedItems: settings.excludeDiscountedItems,
                     limitOnePerCustomer: settings.limitOnePerCustomer,
                 })
-                .where(eq(organizationSettings.organizationId, organizationId));
+                .where(eq(ORGANIZATION_SETTINGS_TABLE.organizationId, organizationId));
             return {
                 success: true,
                 message: "Settings updated successfully",
             };
         }
         console.log("Not exists");
-        await db.insert(organizationSettings).values({
+        await db.insert(ORGANIZATION_SETTINGS_TABLE).values({
             organizationId: organizationId,
             organizationSettingsId: uuid(),
             automaticCampaigns: settings.automaticCampaigns,
