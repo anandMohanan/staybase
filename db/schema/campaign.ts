@@ -1,7 +1,16 @@
-import { boolean, decimal, integer, jsonb, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import {
+	boolean,
+	decimal,
+	integer,
+	jsonb,
+	pgTable,
+	text,
+	timestamp,
+	varchar,
+} from "drizzle-orm/pg-core";
 import { organization } from "./organization";
 
-export const campaigns = pgTable("campaigns", {
+export const CAMPAIGNS_TABLE = pgTable("campaigns", {
 	id: varchar("id", { length: 255 }).primaryKey(),
 	name: varchar("name", { length: 255 }).notNull(),
 	description: text("description"),
@@ -17,7 +26,7 @@ export const campaigns = pgTable("campaigns", {
 	createdAt: timestamp("created_at").notNull(),
 });
 
-export const customers = pgTable("customers", {
+export const CUSTOMERS_TABLE = pgTable("customers", {
 	id: text("id").primaryKey(),
 	customerId: text("customer_id").notNull(),
 	email: text("email").notNull(),
@@ -30,11 +39,11 @@ export const customers = pgTable("customers", {
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const campaignEmails = pgTable("campaign_emails", {
+export const CAMPAIGN_EMAILS_TABLE = pgTable("campaign_emails", {
 	id: varchar("id", { length: 255 }).primaryKey(),
 	campaignId: varchar("campaign_id", { length: 255 })
 		.notNull()
-		.references(() => campaigns.id),
+		.references(() => CAMPAIGNS_TABLE.id),
 	customerEmail: varchar("customer_email", { length: 255 }).notNull(),
 	emailType: varchar("email_type", { length: 50 }).notNull(), // initial, followup, reminder
 	content: text("content").notNull(),
@@ -45,11 +54,11 @@ export const campaignEmails = pgTable("campaign_emails", {
 	updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const emailEvents = pgTable("email_events", {
+export const EMAIL_EVENTS_TABLE = pgTable("email_events", {
 	id: varchar("id", { length: 255 }).primaryKey(),
 	emailId: varchar("email_id", { length: 255 })
 		.notNull()
-		.references(() => campaignEmails.id),
+		.references(() => CAMPAIGN_EMAILS_TABLE.id),
 	eventType: varchar("event_type", { length: 50 }).notNull(), // delivered, opened, clicked, bounced, complained
 	metadata: jsonb("metadata").default({}),
 	occurredAt: timestamp("occurred_at").notNull(),
