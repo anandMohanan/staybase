@@ -1,7 +1,7 @@
-import { index, json, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { organization } from "./user";
+import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { organization } from "./organization";
 
-export const integrations = pgTable('integrations', {
+export const INTEGRATION_TABLE = pgTable('integrations', {
     id: uuid('id').defaultRandom().primaryKey(),
     organizationId: text('business_id').notNull().references(() => organization.id),
     platform: text('platform').notNull(),
