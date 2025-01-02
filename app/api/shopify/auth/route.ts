@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
@@ -18,13 +18,15 @@ export async function GET(req: Request) {
     ].join(',');
 
     const nonce = crypto.randomBytes(16).toString('hex');
-    const authUrl = `https://${shop}/admin/oauth/authorize?` +
-        new URLSearchParams({
-            client_id: process.env.SHOPIFY_CLIENT_ID!,
+    if (!process.env.SHOPIFY_CLIENT_ID) {
+        return new NextResponse('SHOPIFY_CLIENT_ID is not set', { status: 500 });
+    }
+    const authUrl = `https://${shop}/admin/oauth/authorize?${new URLSearchParams({
+            client_id: process.env.SHOPIFY_CLIENT_ID,
             scope: scopes,
             redirect_uri: `${process.env.APP_URL}/api/shopify/callback`,
             state: nonce
-        }).toString();
+        }).toString()}`;
 
     return NextResponse.redirect(authUrl);
 }

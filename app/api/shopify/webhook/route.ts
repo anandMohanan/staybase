@@ -1,10 +1,9 @@
-// app/api/shopify/webhooks/route.ts
 import { NextResponse } from 'next/server';
 import { secureCache } from '@/lib/redis';
 import { headers } from 'next/headers';
 import { verifyShopifyWebhook } from '@/lib/shopify';
 import { db } from '@/db';
-import { integrations } from '@/db/schema/integration';
+import { INTEGRATION_TABLE } from '@/db/schema/integration';
 import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
@@ -19,8 +18,8 @@ export async function POST(req: Request) {
 
         // Verify webhook authenticity
         const integration = await db.select()
-            .from(integrations)
-            .where(eq(integrations.shopDomain, shopDomain))
+            .from(INTEGRATION_TABLE)
+            .where(eq(INTEGRATION_TABLE.shopDomain, shopDomain))
             .limit(1);
 
         if (!integration.length) {

@@ -1,13 +1,13 @@
 
 import { createShopifyClient } from '@/lib/shopify';
 import { db } from '@/db';
-import { integrations } from '@/db/schema/integration';
+import { INTEGRATION_TABLE } from '@/db/schema/integration';
 import { auth } from '@/lib/auth';
 import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { secureCache } from '@/lib/redis';
-import { customers } from '@/db/schema/user';
+import { CUSTOMERS_TABLE } from '@/db/schema/campaign';
 
 interface EnrichedCustomer {
     id: string;
@@ -92,14 +92,13 @@ export async function GET(req: Request) {
         const cacheKey = `customers:${organization[0].id}`;
         const cachedData = await secureCache.get(cacheKey);
         if (cachedData) {
-            console.log("From cache--------------------------------------", cachedData)
             return NextResponse.json(cachedData);
         }
 
         const dbCustomers = await db
             .select()
-            .from(customers)
-            .where(eq(customers.organizationId, organization[0].id))
+            .from(CUSTOMERS_TABLE)
+            .where(eq(CUSTOMERS_TABLE.organizationId, organization[0].id))
 
         const enrichedDbCustomers: EnrichedCustomer[] = dbCustomers.map(customer => ({
             id: customer.customerId,
@@ -121,8 +120,8 @@ export async function GET(req: Request) {
             source: 'database'
         }));
 
-        const integration = await db.select().from(integrations).where(
-            eq(integrations.organizationId, organization[0].id)
+        const integration = await db.select().from(INTEGRATION_TABLE).where(
+            eq(INTEGRATION_TABLE.organizationId, organization[0].id)
         );
 
         let enrichedShopifyCustomers: EnrichedCustomer[] = [];
@@ -147,7 +146,7 @@ export async function GET(req: Request) {
                 const allOrders = customer.allOrders.edges.map((o: any) => o.node);
 
                 const totalSpent = allOrders.reduce((sum: number, order: any) =>
-                    sum + parseFloat(order.totalPriceSet.shopMoney.amount), 0);
+                    sum + Number.parseFloat(order.totalPriceSet.shopMoney.amount), 0);
 
                 const orderCount = allOrders.length;
 
@@ -171,7 +170,7 @@ export async function GET(req: Request) {
                     }),
                     recentOrders: recentOrders.map((order: any) => ({
                         createdAt: order.createdAt,
-                        total: parseFloat(order.totalPriceSet.shopMoney.amount)
+                        total: Number.parseFloat(order.totalPriceSet.shopMoney.amount)
                     })),
                     source: 'shopify' as const
                 };

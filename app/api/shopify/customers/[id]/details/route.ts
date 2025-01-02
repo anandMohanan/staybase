@@ -1,10 +1,10 @@
 import { createShopifyClient } from '@/lib/shopify';
 import { db } from '@/db';
-import { integrations } from '@/db/schema/integration';
+import { INTEGRATION_TABLE } from '@/db/schema/integration';
 import { auth } from '@/lib/auth';
 import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
     req: NextRequest,
@@ -22,8 +22,8 @@ export async function GET(
             headers: await headers()
         });
 
-        const integration = await db.select().from(integrations).where(
-            eq(integrations.organizationId, organization[0].id)
+        const integration = await db.select().from(INTEGRATION_TABLE).where(
+            eq(INTEGRATION_TABLE.organizationId, organization[0].id)
         );
 
         if (!integration[0]) {
