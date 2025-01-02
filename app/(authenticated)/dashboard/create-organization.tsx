@@ -5,11 +5,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
-import { CREATEORGFORMTYPE, CREATEORGSCHEMA } from "@/lib/types/auth";
+import { type CREATEORGFORMTYPE, CREATEORGSCHEMA } from "@/lib/types/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Building, Loader2 } from 'lucide-react';
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 export const CreateOrganization = () => {
@@ -21,7 +20,6 @@ export const CreateOrganization = () => {
         },
     });
     const { toast } = useToast();
-    const router = useRouter();
     const { mutate: createOrganization, isPending: createOrganizationPending } = useMutation({
         mutationFn: async (values: CREATEORGFORMTYPE) => {
             const { data, error } = await authClient.organization.create({

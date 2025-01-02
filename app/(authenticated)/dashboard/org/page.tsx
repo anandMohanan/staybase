@@ -4,7 +4,7 @@ import { DataTable } from "./data-table";
 import { headers } from "next/headers";
 import { transformToTableOrganizations } from "@/lib/utils";
 import { db } from "@/db";
-import { organizationSettings } from "@/db/schema/user";
+import { ORGANIZATION_SETTINGS_TABLE } from "@/db/schema/organization";
 import { eq } from "drizzle-orm";
 import { OrganizationSettingsComponent } from "./org-settings";
 import type { SettingsFormValues } from "@/lib/types/organization";
@@ -22,8 +22,8 @@ export default async function OrganizationsPage() {
 
 	const settings = await db
 		.select()
-		.from(organizationSettings)
-		.where(eq(organizationSettings.organizationId, data?.id));
+		.from(ORGANIZATION_SETTINGS_TABLE)
+		.where(eq(ORGANIZATION_SETTINGS_TABLE.organizationId, data?.id));
 	console.log("Settings:", settings);
 
 	return (

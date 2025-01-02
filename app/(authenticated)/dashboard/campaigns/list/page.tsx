@@ -1,7 +1,7 @@
 import React from 'react';
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
-import { campaigns } from "@/db/schema/user";
+import { CAMPAIGNS_TABLE } from "@/db/schema/campaign";
 import { headers } from "next/headers";
 import {
     Card,
@@ -37,6 +37,7 @@ import { MoreHorizontal, Search, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CampaignCreationDialog } from '@/components/campaign/create-campaign';
 import { eq } from 'drizzle-orm';
+import { redirect } from 'next/navigation';
 
 function getStatusColor(status) {
     switch (status.toLowerCase()) {
@@ -71,7 +72,11 @@ export default async function CampaignsPage() {
         headers: await headers()
     });
 
-    const allCampaigns = await db.select().from(campaigns).where(eq(campaigns.organizationId, session?.session.activeOrganizationId!));
+    if (!session?.session.activeOrganizationId) {
+        redirect("/dashboard/create-organization");
+    }
+
+    const allCampaigns = await db.select().from(CAMPAIGNS_TABLE).where(eq(CAMPAIGNS_TABLE.organizationId, session?.session.activeOrganizationId));
 
     // Calculate summary metrics
     const totalCampaigns = allCampaigns.length;
@@ -171,7 +176,6 @@ export default async function CampaignsPage() {
                             <TableHead>Reach</TableHead>
                             <TableHead>Engagement Rate</TableHead>
                             <TableHead>Start Date</TableHead>
-                            <TableHead></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

@@ -10,7 +10,7 @@ import { ShopifyIntegrationFormComponent } from './shopify-form'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import { db } from '@/db'
-import { integrations } from '@/db/schema/integration'
+import { INTEGRATION_TABLE } from '@/db/schema/integration'
 import { eq } from 'drizzle-orm'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -20,7 +20,7 @@ const IntegrationPage = async () => {
     const organization = await auth.api.listOrganizations({
         headers: await headers()
     })
-    const integrationData = await db.select().from(integrations).where(eq(integrations.organizationId, organization[0].id))
+    const integrationData = await db.select().from(INTEGRATION_TABLE).where(eq(INTEGRATION_TABLE.organizationId, organization[0].id))
 
     const formatDate = (dateString: string | null) => {
         if (!dateString) return 'Never'
