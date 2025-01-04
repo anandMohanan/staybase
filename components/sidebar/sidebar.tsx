@@ -30,81 +30,91 @@ import { NavMain } from "./nav-main";
 import { TeamSwitcher } from "./team-switcher";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useGetCampaigns } from "@/hooks/campaigns";
+import { profile } from "console";
 
 type GlobalSidebarProperties = {
 	readonly children: ReactNode;
 };
 
-const data = {
-	navMain: [
-		{
-			title: "Campaigns",
-			url: "/dashboard/campaigns",
-			icon: TentIcon,
-			items: [
-				{
-					title: "Campaigns List",
-					url: "/dashboard/campaigns/active",
-				},
-				{
-					title: "Performance",
-					url: "/dashboard/campaigns/performance",
-				},
-			],
-		},
-		{
-			title: "Customers",
-			url: "/dashboard/customers",
-			icon: BookUserIcon,
-			items: [
-				{
-					title: "Customers List",
-					url: "/dashboard/customers/list",
-				},
-				{
-					title: "Risk Analysis",
-					url: "/dashboard/customers/risk-analysis",
-				},
-			],
-		},
-		{
-			title: "Analytics",
-			url: "/dashboard/analytics",
-			icon: FileChartLineIcon,
-			items: [
-				{
-					title: "Customer Insights", // Combines behavior & retention
-					url: "/dashboard/analytics/customer-insights",
-				},
-				{
-					title: "ROI Analysis",
-					url: "/dashboard/analytics/roi-analysis",
-				},
-			],
-		},
-	],
-	projects: [
-		{
-			name: "Design Engineering",
-			url: "#",
-			icon: Frame,
-		},
-		{
-			name: "Sales & Marketing",
-			url: "#",
-			icon: PieChart,
-		},
-		{
-			name: "Travel",
-			url: "#",
-			icon: MapIcon,
-		},
-	],
-};
-
 export const GlobalSidebar = ({
 	...props
 }: React.ComponentProps<typeof Sidebar>) => {
+	const { data: campaigns } = useGetCampaigns();
+	console.log(campaigns, "campaigns");
+	const data = {
+		navMain: [
+			{
+				title: "Campaigns",
+				url: "/dashboard/campaigns",
+				icon: TentIcon,
+				items: [
+					{
+						title: "Campaigns List",
+						url: "/dashboard/campaigns/active",
+					},
+					{
+						title: "Performance",
+						url: "/dashboard/campaigns/performance",
+					},
+				],
+			},
+			{
+				title: "Customers",
+				url: "/dashboard/customers",
+				icon: BookUserIcon,
+				items: [
+					{
+						title: "Customers List",
+						url: "/dashboard/customers/list",
+					},
+					{
+						title: "Risk Analysis",
+						url: "/dashboard/customers/risk-analysis",
+					},
+				],
+			},
+			{
+				title: "Analytics",
+				url: "/dashboard/analytics",
+				icon: FileChartLineIcon,
+				items: [
+					{
+						title: "Customer Insights", // Combines behavior & retention
+						url: "/dashboard/analytics/customer-insights",
+					},
+					{
+						title: "ROI Analysis",
+						url: "/dashboard/analytics/roi-analysis",
+					},
+				],
+			},
+		],
+		projects:
+			campaigns?.map((campaign) => ({
+				name: campaign.name,
+				url: `/dashboard/campaigns/${campaign.campaignId}`,
+				icon: TentIcon,
+			})) || [],
+
+		// projects: [
+		//     {
+		//         name: "Design Engineering",
+		//         url: "#",
+		//         icon: Frame,
+		//     },
+		//     {
+		//         name: "Sales & Marketing",
+		//         url: "#",
+		//         icon: PieChart,
+		//     },
+		//     {
+		//         name: "Travel",
+		//         url: "#",
+		//         icon: MapIcon,
+		//     },
+		// ],
+	};
 	const { data: organizations } = authClient.useListOrganizations();
 	const { data: sessionData, error } = authClient.useSession();
 	console.log(sessionData);

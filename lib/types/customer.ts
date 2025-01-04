@@ -11,6 +11,8 @@ export const CustomerSchema = z.object({
     riskScore: z.number().min(0).max(100)
 });
 
+
+
 export const CustomersResponseSchema = z.array(CustomerSchema);
 
 export type Customer = z.infer<typeof CustomerSchema>;
