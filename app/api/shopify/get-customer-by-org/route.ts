@@ -4,9 +4,10 @@ import { INTEGRATION_TABLE } from "@/db/schema/integration";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { secureCache } from "@/lib/redis";
 import { CUSTOMERS_TABLE } from "@/db/schema/campaign";
+import { request } from "http";
 
 interface EnrichedCustomer {
     id: string;
@@ -89,13 +90,15 @@ query GetCustomers {
 }
 `;
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
     try {
-        const organization = await auth.api.listOrganizations({
-            headers: await headers(),
-        });
+        const body = await req.json();
+        const { organizationId } = body;
+        if (!organizationId) {
+            return NextResponse.json("No organization found", { status: 404 });
+        }
 
-        const cacheKey = `customers:${organization[0].id}`;
+        const cacheKey = `customers:${organizationId}`;
         const cachedData = await secureCache.get(cacheKey);
         if (cachedData) {
             return NextResponse.json(cachedData);
@@ -104,7 +107,7 @@ export async function GET(req: Request) {
         const dbCustomers = await db
             .select()
             .from(CUSTOMERS_TABLE)
-            .where(eq(CUSTOMERS_TABLE.organizationId, organization[0].id));
+            .where(eq(CUSTOMERS_TABLE.organizationId, organizationId));
 
         const enrichedDbCustomers: EnrichedCustomer[] = dbCustomers.map(
             (customer) => ({
@@ -135,7 +138,7 @@ export async function GET(req: Request) {
         const integration = await db
             .select()
             .from(INTEGRATION_TABLE)
-            .where(eq(INTEGRATION_TABLE.organizationId, organization[0].id));
+            .where(eq(INTEGRATION_TABLE.organizationId, organizationId));
 
         let enrichedShopifyCustomers: EnrichedCustomer[] = [];
 
@@ -154,7 +157,6 @@ export async function GET(req: Request) {
 
             enrichedShopifyCustomers = data.customers.edges.map((edge: any) => {
                 const customer = edge.node;
-                console.log(customer, "customer from shopify");
                 const recentOrders = customer.recentOrders.edges.map(
                     (o: any) => o.node,
                 );
@@ -175,6 +177,7 @@ export async function GET(req: Request) {
                         (1000 * 60 * 60 * 24),
                     )
                     : 999;
+                    console.log(customer, "customer from shopify")
 
                 return {
                     id: customer.id.split("/").pop(),
