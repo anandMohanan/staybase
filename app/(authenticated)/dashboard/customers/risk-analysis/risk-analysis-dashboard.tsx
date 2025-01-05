@@ -1,36 +1,58 @@
-"use client"
+"use client";
 
-import React from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { AlertOctagon, TrendingDown, Users, DollarSign } from 'lucide-react'
-import { Badge } from "@/components/ui/badge"
-import { Bar, BarChart, Line, LineChart, Pie, PieChart, Cell } from "recharts"
-import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { MetricCard } from '@/components/metric-card'
+import React from "react";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { AlertOctagon, TrendingDown, Users, DollarSign } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Bar, BarChart, Line, LineChart, Pie, PieChart, Cell } from "recharts";
+import {
+    ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
+    ChartTooltip,
+    ChartTooltipContent,
+} from "@/components/ui/chart";
+import { MetricCard } from "@/components/metric-card";
 
 interface CustomerRisk {
-    id: string
-    firstName: string
-    lastName: string
-    email: string
-    riskScore: number
-    totalSpent: number
-    lastOrderDate: string
-    orderCount: number
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    riskScore: number;
+    totalSpent: number;
+    lastOrderDate: string;
+    orderCount: number;
 }
 
 interface RiskAnalyticsProps {
-    customers: CustomerRisk[]
+    customers: CustomerRisk[];
 }
 
 const getRiskBadgeVariant = (riskScore: number) => {
-    if (riskScore >= 75) return "destructive"
-    if (riskScore >= 50) return "warning"
-    return "success"
-}
+    if (riskScore >= 75) return "destructive";
+    if (riskScore >= 50) return "warning";
+    return "success";
+};
 
-const CustomerTable = ({ customers, title }: { customers: CustomerRisk[], title: string }) => (
+const CustomerTable = ({
+    customers,
+    title,
+}: { customers: CustomerRisk[]; title: string }) => (
     <Card className="mt-6">
         <CardHeader>
             <CardTitle>{title}</CardTitle>
@@ -47,7 +69,7 @@ const CustomerTable = ({ customers, title }: { customers: CustomerRisk[], title:
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {customers.map(customer => (
+                    {customers.map((customer) => (
                         <TableRow key={customer.id}>
                             <TableCell>
                                 <div className="font-medium">
@@ -65,63 +87,76 @@ const CustomerTable = ({ customers, title }: { customers: CustomerRisk[], title:
                             <TableCell>
                                 {customer.lastOrderDate
                                     ? new Date(customer.lastOrderDate).toLocaleDateString()
-                                    : 'No orders'}
+                                    : "No orders"}
                             </TableCell>
-                            <TableCell>
-                                ${customer.totalSpent.toLocaleString()}
-                            </TableCell>
-                            <TableCell>
-                                {customer.orderCount}
-                            </TableCell>
+                            <TableCell>${customer.totalSpent.toLocaleString()}</TableCell>
+                            <TableCell>{customer.orderCount}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
         </CardContent>
     </Card>
-)
+);
 
 export default function RiskAnalytics({ customers }: RiskAnalyticsProps) {
-    const riskSegments = customers.reduce((acc, customer) => {
-        if (customer.riskScore >= 75) acc.highRisk++
-        else if (customer.riskScore >= 50) acc.mediumRisk++
-        else acc.lowRisk++
-        return acc
-    }, { highRisk: 0, mediumRisk: 0, lowRisk: 0 })
+    const riskSegments = customers.reduce(
+        (acc, customer) => {
+            if (customer.riskScore >= 75) acc.highRisk++;
+            else if (customer.riskScore >= 50) acc.mediumRisk++;
+            else acc.lowRisk++;
+            return acc;
+        },
+        { highRisk: 0, mediumRisk: 0, lowRisk: 0 },
+    );
 
     const atRiskRevenue = customers
-        .filter(c => c.riskScore >= 75)
-        .reduce((sum, customer) => sum + customer.totalSpent, 0)
+        .filter((c) => c.riskScore >= 75)
+        .reduce((sum, customer) => sum + customer.totalSpent, 0);
 
     const highRiskCustomers = customers
-        .filter(c => c.riskScore >= 75)
-        .sort((a, b) => b.riskScore - a.riskScore)
+        .filter((c) => c.riskScore >= 75)
+        .sort((a, b) => b.riskScore - a.riskScore);
 
     const mediumRiskCustomers = customers
-        .filter(c => c.riskScore >= 50 && c.riskScore < 75)
-        .sort((a, b) => b.riskScore - a.riskScore)
+        .filter((c) => c.riskScore >= 50 && c.riskScore < 75)
+        .sort((a, b) => b.riskScore - a.riskScore);
 
     const lowRiskCustomers = customers
-        .filter(c => c.riskScore < 50)
-        .sort((a, b) => b.riskScore - a.riskScore)
+        .filter((c) => c.riskScore < 50)
+        .sort((a, b) => b.riskScore - a.riskScore);
 
     const riskDistribution = Array.from({ length: 10 }, (_, i) => ({
         name: `${i * 10}-${(i + 1) * 10}`,
-        total: customers.filter(c =>
-            c.riskScore >= i * 10 && c.riskScore < (i + 1) * 10
-        ).length
-    }))
+        total: customers.filter(
+            (c) => c.riskScore >= i * 10 && c.riskScore < (i + 1) * 10,
+        ).length,
+    }));
 
     const pieData = [
-        { name: 'Low Risk', value: riskSegments.lowRisk },
-        { name: 'Medium Risk', value: riskSegments.mediumRisk },
-        { name: 'High Risk', value: riskSegments.highRisk }
-    ]
+        {
+            name: "Low Risk",
+            value: riskSegments.lowRisk,
+            fill: "var(--color-lowRisk)",
+        },
+        {
+            name: "Medium Risk",
+            value: riskSegments.mediumRisk,
+            fill: "var(--color-mediumRisk)",
+        },
+        {
+            name: "High Risk",
+            value: riskSegments.highRisk,
+            fill: "var(--color-highRisk)",
+        },
+    ];
 
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight">Risk Analysis Dashboard</h2>
+                <h2 className="text-3xl font-bold tracking-tight">
+                    Risk Analysis Dashboard
+                </h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <MetricCard
@@ -138,7 +173,10 @@ export default function RiskAnalytics({ customers }: RiskAnalyticsProps) {
                 />
                 <MetricCard
                     title="Avg Risk Score"
-                    value={Math.round(customers.reduce((sum, c) => sum + c.riskScore, 0) / customers.length)}
+                    value={Math.round(
+                        customers.reduce((sum, c) => sum + c.riskScore, 0) /
+                        customers.length,
+                    )}
                     icon={TrendingDown}
                     tooltipContent="Average Risk Score is the average risk score of all customers"
                 />
@@ -166,7 +204,11 @@ export default function RiskAnalytics({ customers }: RiskAnalyticsProps) {
                         >
                             <BarChart data={riskDistribution}>
                                 <ChartTooltip content={<ChartTooltipContent />} />
-                                <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]} />
+                                <Bar
+                                    dataKey="total"
+                                    fill="var(--color-total)"
+                                    radius={[4, 4, 0, 0]}
+                                />
                                 <Line
                                     type="monotone"
                                     dataKey="total"
@@ -211,11 +253,10 @@ export default function RiskAnalytics({ customers }: RiskAnalyticsProps) {
                                     cx="50%"
                                     cy="50%"
                                     outerRadius={80}
-                                    fill="var(--color-lowRisk)"
                                     label={(entry) => `${entry.name}: ${entry.value}`}
                                 >
                                     {pieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={`var(--color-${entry.name.toLowerCase().replace(' ', '')})`} />
+                                        <Cell key={`cell-${index}`} />
                                     ))}
                                 </Pie>
                                 <ChartTooltip content={<ChartTooltipContent />} />
@@ -238,7 +279,5 @@ export default function RiskAnalytics({ customers }: RiskAnalyticsProps) {
                 title={`Low Risk Customers (${riskSegments.lowRisk})`}
             />
         </div>
-    )
+    );
 }
-
-

@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { auth } from "../../../../lib/auth";
 import { headers } from "next/headers";
 import { CAMPAIGNS_TABLE } from "@/db/schema/campaign";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export const GET = async (req: Request) => {
 	try {
@@ -20,7 +20,14 @@ export const GET = async (req: Request) => {
 				description: CAMPAIGNS_TABLE.description,
 			})
 			.from(CAMPAIGNS_TABLE)
-			.where(eq(CAMPAIGNS_TABLE.organizationId, organizationId));
+			.where(
+				and(
+					eq(CAMPAIGNS_TABLE.organizationId, organizationId),
+					eq(CAMPAIGNS_TABLE.status, "ACTIVE"),
+				),
+			)
+			.limit(5)
+			.orderBy(CAMPAIGNS_TABLE.createdAt);
 
 		return new Response(JSON.stringify(campaigns), { status: 200 });
 	} catch (err: any) {
