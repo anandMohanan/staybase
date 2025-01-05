@@ -3,24 +3,26 @@ import { useQuery } from "@tanstack/react-query";
 
 export const useCustomer = () => {
     return useQuery({
-        queryKey: ['customers'],
+        queryKey: ["customers"],
         queryFn: async () => {
             try {
-                const response = await fetch('/api/shopify/customers');
-                console.log(response, "response")
+                const response = await fetch("/api/shopify/customers");
+                console.log(response, "response");
                 if (!response.ok) {
                     throw new Error(`API error: ${response.text}`);
                 }
                 const rawData = await response.json();
+                console.log(rawData, "rawData");
                 const parsedData = CustomersResponseSchema.safeParse(rawData);
+                console.log(parsedData, "parsedData");
 
                 if (!parsedData.success) {
-                    console.error('Validation error:', parsedData.error);
-                    throw new Error('Invalid data received from API');
+                    console.error("Validation error:", parsedData.error);
+                    throw new Error("Invalid data received from API");
                 }
                 return parsedData.data;
             } catch (error) {
-                console.error('Error fetching customers:', error);
+                console.error("Error fetching customers:", error);
                 throw error;
             }
         },
@@ -31,26 +33,26 @@ export const useCustomer = () => {
         refetchOnReconnect: true,
         refetchInterval: 1000 * 60 * 5,
     });
-}
-
+};
 
 export const useCustomerDetails = (customerId: string) => {
-
     return useQuery({
-        queryKey: ['customer-details', customerId],
+        queryKey: ["customer-details", customerId],
         queryFn: async () => {
             try {
-                const response = await fetch(`/api/shopify/customers/${customerId}/details`);
-                console.log(response, "response")
+                const response = await fetch(
+                    `/api/shopify/customers/${customerId}/details`,
+                );
+                console.log(response, "response");
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const data = await response.json();
-                console.log(data, "data")
+                console.log(data, "data");
                 return data;
             } catch (error) {
-                console.error('Error fetching customer details:', error);
+                console.error("Error fetching customer details:", error);
                 throw error;
             }
         },
@@ -59,6 +61,5 @@ export const useCustomerDetails = (customerId: string) => {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         refetchOnReconnect: false,
-    })
-
-}
+    });
+};
