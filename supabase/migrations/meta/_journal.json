@@ -64,6 +64,20 @@
       "when": 1735495018396,
       "tag": "0008_tiny_iron_monger",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1736189467855,
+      "tag": "0009_real_angel",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1736189643960,
+      "tag": "0010_short_psynapse",
+      "breakpoints": true
     }
   ]
 }
