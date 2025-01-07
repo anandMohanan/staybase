@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon, LoaderIcon, PlusCircle } from "lucide-react";
+import { CalendarIcon, LoaderIcon, Pencil, PlusCircle } from "lucide-react";
 import {
 	campaignFormSchema,
 	type CampaignFormValues,
@@ -47,7 +47,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { createCampaign } from "@/server/campaign";
+import { createCampaign, updateCampaign } from "@/server/campaign";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
@@ -58,71 +58,72 @@ const steps = [
 	{ id: "review", title: "Review" },
 ];
 
-export const CampaignCreationDialog = () => {
+interface CampaignDialogProps {
+	mode?: "create" | "edit";
+	campaignId?: string;
+}
+
+export const CampaignCreationDialog = ({
+	mode = "create",
+	campaignId,
+}: CampaignDialogProps) => {
 	const [open, setOpen] = useState(false);
 
-	const router = useRouter();
 	const [currentStep, setCurrentStep] = useState(0);
+
 
 	const form = useForm<CampaignFormValues>({
 		resolver: zodResolver(campaignFormSchema),
 		defaultValues: {
-			name: "",
-			description: "",
-			targetAudience: undefined,
-			riskLevel: undefined,
-			isAutomated: false,
+			name: campaign?.name || "",
+			description: campaign?.description || "",
+			targetAudience: campaign?.targetAudience || undefined,
+			riskLevel: campaign?.riskLevel || undefined,
+			isAutomated: campaign?.isAutomated || false,
+			startDate: campaign?.startDate || undefined,
+			endDate: campaign?.endDate || undefined,
 		},
 	});
 
-	const { isSubmitting, isDirty } = form.formState;
-
-	async function onSubmit(data: CampaignFormValues) {
-		try {
-			const response = await createCampaign(data);
-			if (!response.success) throw new Error(response.message);
-			setOpen(false);
-		} catch (error) {
-			toast.error("Failed to create campaign");
-			console.error("Error creating campaign:", error);
-		}
-	}
+	const { isSubmitting } = form.formState;
 
 	const { toast } = useToast();
 
-	const { mutate: mutateCampaign, isPending: createCampaignPending } =
-		useMutation({
-			mutationFn: async (values: CampaignFormValues) => {
-				console.log(values);
+	const { mutate: mutateCampaign, isPending: isPendingMutation } = useMutation({
+		mutationFn: async (values: CampaignFormValues) => {
+			if (mode === "edit" && campaignId) {
+				const response = await updateCampaign(campaignId, values);
+				if (!response.success) throw new Error(response.message);
+			} else {
 				const response = await createCampaign(values);
 				if (!response.success) throw new Error(response.message);
-				setOpen(false);
-				form.reset();
-			},
-			onError(error, variables, context) {
-				console.log(error, "ERROR");
-				if (error.status === 500) {
-					toast({
-						title: "Server Error",
-						description:
-							"Please check your internet connection or try again later.",
-						variant: "default",
-					});
-					return;
-				}
+			}
+			setOpen(false);
+			if (mode === "create") form.reset();
+		},
+		onError(error: any) {
+			if (error?.status === 500) {
 				toast({
-					title: error.message,
-					description: "Please try again.",
+					title: "Server Error",
+					description:
+						"Please check your internet connection or try again later.",
 					variant: "default",
 				});
-			},
-			onSuccess: () => {
-				toast({
-					title: "Campaign Created Successfully",
-					variant: "default",
-				});
-			},
-		});
+				return;
+			}
+			toast({
+				title: error.message || "Something went wrong",
+				description: "Please try again.",
+				variant: "default",
+			});
+		},
+		onSuccess: () => {
+			toast({
+				title: `Campaign ${mode === "create" ? "Created" : "Updated"} Successfully`,
+				variant: "default",
+			});
+		},
+	});
 
 	const renderStep = () => {
 		switch (currentStep) {
@@ -420,19 +421,41 @@ export const CampaignCreationDialog = () => {
 		}
 	};
 
+	const handleDialogClose = (open: boolean) => {
+		if (!open) {
+			setCurrentStep(0);
+			if (mode === "create") {
+				form.reset();
+			}
+		}
+		setOpen(open);
+	};
+
+	const defaultTrigger =
+		mode === "create" ? (
+			<Button>
+				<PlusCircle className="mr-2 h-4 w-4" />
+				Create Campaign
+			</Button>
+		) : (
+			<Button variant="outline" size="sm">
+				Edit
+			</Button>
+		);
+
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button>
-					<PlusCircle className="mr-2 h-4 w-4" />
-					Create Campaign
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger asChild>{defaultTrigger}</DialogTrigger>
 			<DialogContent className="max-w-3xl">
 				<DialogHeader>
-					<DialogTitle>Create New Campaign</DialogTitle>
+					<DialogTitle>
+						{" "}
+						{mode === "create" ? "Create New Campaign" : "Edit Campaign"}
+					</DialogTitle>
 					<DialogDescription>
-						Set up a new campaign in just a few steps.
+						{mode === "create"
+							? "Set up a new campaign in just a few steps."
+							: "Update your campaign details."}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -479,11 +502,13 @@ export const CampaignCreationDialog = () => {
 									onClick={handleNext}
 									disabled={isSubmitting}
 								>
-									{createCampaignPending && (
+									{isPendingMutation && (
 										<LoaderIcon className="w-4 h-4 mr-2 animate-spin" />
 									)}
 									{currentStep === steps.length - 1
-										? "Create Campaign"
+										? mode === "create"
+											? "Create Campaign"
+											: "Update Campaign"
 										: "Next"}
 								</Button>
 							</div>
