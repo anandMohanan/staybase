@@ -1,18 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRightCircle, ArrowUpDown, PauseCircle } from "lucide-react";
 import {
-	ColumnDef,
-	ColumnFiltersState,
+	type ColumnDef,
+	type ColumnFiltersState,
 	flexRender,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
-	SortingState,
+	type SortingState,
 	useReactTable,
-	VisibilityState,
+	type VisibilityState,
 } from "@tanstack/react-table";
 import {
 	Table,
@@ -22,8 +21,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
-import { CampaignColumn, columns as baseColumns } from "./columns";
 import React from "react";
 import { Input } from "@/components/ui/input";
 

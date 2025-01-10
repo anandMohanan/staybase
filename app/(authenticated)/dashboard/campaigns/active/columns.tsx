@@ -1,9 +1,9 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import { CampaignTableActions } from "./table-action";
 
 export type CampaignColumn = {
 	id: string;
@@ -79,25 +79,8 @@ export const columns: ColumnDef<CampaignColumn>[] = [
 		id: "actions",
 		header: "Actions",
 		cell: ({ row }) => {
-			const value = "sdfdfd";
-			return (
-				<div className="flex items-center space-x-2">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => console.log("Edit", value)}
-					>
-						Edit
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => console.log("Delete", value)}
-					>
-						Delete
-					</Button>
-				</div>
-			);
+			const value = row.original.id;
+			return <CampaignTableActions value={value} />;
 		},
 	},
 ];
