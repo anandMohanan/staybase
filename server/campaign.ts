@@ -53,6 +53,7 @@ export const deleteCampaign = async (campaignId: string) => {
             .where(eq(CAMPAIGN_EMAILS_TABLE.campaignId, campaignId));
         await db.delete(CAMPAIGNS_TABLE).where(eq(CAMPAIGNS_TABLE.id, campaignId));
         revalidatePath("/dashboard/campaigns/active");
+        revalidatePath("/dashboard/");
         return {
             success: true,
             message: "Campaign deleted successfully",
@@ -77,6 +78,8 @@ export const updateCampaign = async (
             .update(CAMPAIGNS_TABLE)
             .set(campaignData)
             .where(eq(CAMPAIGNS_TABLE.id, campaignId));
+        revalidatePath("/dashboard/campaigns/active");
+        revalidatePath("/dashboard/");
         return {
             success: true,
             message: "Campaign updated successfully",
@@ -87,6 +90,33 @@ export const updateCampaign = async (
             success: false,
             message:
                 error instanceof Error ? error.message : "Error updating campaign",
+            error: error instanceof Error ? error.toString() : "Unknown error",
+        };
+    }
+};
+
+export const changeCampaignStatus = async (
+    campaignId: string,
+    status: string,
+) => {
+    try {
+        await db
+            .update(CAMPAIGNS_TABLE)
+            .set({ status: status })
+            .where(eq(CAMPAIGNS_TABLE.id, campaignId));
+        revalidatePath("/dashboard/campaigns/active");
+        return {
+            success: true,
+            message: "Campaign status changed successfully",
+        };
+    } catch (error) {
+        console.error("Error changing campaign status:", error);
+        return {
+            success: false,
+            message:
+                error instanceof Error
+                    ? error.message
+                    : "Error changing campaign status",
             error: error instanceof Error ? error.toString() : "Unknown error",
         };
     }

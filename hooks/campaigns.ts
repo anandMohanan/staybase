@@ -3,7 +3,7 @@ import {
     campaignFormSchema,
     MinimalCampaignSchema,
 } from "@/lib/types/campaign";
-import { deleteCampaign } from "@/server/campaign";
+import { changeCampaignStatus, deleteCampaign } from "@/server/campaign";
 import { useMutation, useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
 
@@ -65,7 +65,7 @@ export const useGetCampaignById = (campaignId: string, isEdit: boolean) => {
                 }
 
                 return validatedData.data;
-            }else{
+            } else {
                 return {};
             }
         },
@@ -99,6 +99,37 @@ export const useDeleteCampaign = () => {
         onSuccess: () => {
             toast({
                 title: "Campaign Deleted Successfully",
+                variant: "default",
+            });
+        },
+    });
+};
+export const useChangeCampaignStatus = () => {
+    const { toast } = useToast();
+    return useMutation({
+        mutationFn: async ({ campaignId, status }: { campaignId: string; status: string }) => {
+            const res = await changeCampaignStatus(campaignId, status.toUpperCase());
+            if (!res.success) throw new Error(res.message);
+        },
+        onError(error: any) {
+            if (error?.status === 500) {
+                toast({
+                    title: "Server Error",
+                    description:
+                        "Please check your internet connection or try again later.",
+                    variant: "default",
+                });
+                return;
+            }
+            toast({
+                title: error.message || "Something went wrong",
+                description: "Please try again.",
+                variant: "default",
+            });
+        },
+        onSuccess: () => {
+            toast({
+                title: "Campaign Status Changed Successfully",
                 variant: "default",
             });
         },

@@ -206,46 +206,48 @@ export const CampaignCreationDialog = ({
                     </div>
                 );
 
-            case 1:
-                return (
-                    <div className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="targetAudience"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Target Audience</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select target audience" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="HIGH_RISK">
-                                                High Risk Customers
-                                            </SelectItem>
-                                            <SelectItem value="MEDIUM_RISK">
-                                                Medium Risk Customers
-                                            </SelectItem>
-                                            <SelectItem value="LOW_RISK">
-                                                Low Risk Customers
-                                            </SelectItem>
-                                            <SelectItem value="ALL">All Customers</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormDescription>
-                                        Choose the customer segment for this campaign.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                );
+                case 1:
+    return (
+        <div className="space-y-4">
+            <FormField
+                control={form.control}
+                name="targetAudience"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Target Audience</FormLabel>
+                        <Select
+                            onValueChange={field.onChange}
+                            value={field.value || ""} // Add explicit empty string fallback
+                        >
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select target audience">
+                                        {field.value ? field.value.toLowerCase().replace('_', ' ') : 'Select target audience'}
+                                    </SelectValue>
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="HIGH_RISK">
+                                    High Risk Customers
+                                </SelectItem>
+                                <SelectItem value="MEDIUM_RISK">
+                                    Medium Risk Customers
+                                </SelectItem>
+                                <SelectItem value="LOW_RISK">
+                                    Low Risk Customers
+                                </SelectItem>
+                                <SelectItem value="ALL">All Customers</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormDescription>
+                            Choose the customer segment for this campaign.
+                        </FormDescription>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+        </div>
+    );
 
             case 2:
                 return (
@@ -414,20 +416,68 @@ export const CampaignCreationDialog = ({
         }
     };
 
-    const handleNext = async () => {
-        if (currentStep === steps.length - 1) {
-            // await form.handleSubmit(onSubmit)();
-            mutateCampaign(form.getValues());
-        } else {
-            setCurrentStep((prev) => prev + 1);
+    const getFieldsForStep = (step: number): Array<keyof CampaignFormValues> => {
+        switch (step) {
+            case 0:
+                return ["name", "description"];
+            case 1:
+                return ["targetAudience"];
+            case 2:
+                return ["startDate", "endDate"];
+            default:
+                return [];
         }
+    };
+
+    const handleNext = async () => {
+        const currentValues = form.getValues();
+        console.log("Current form values:", currentValues);
+
+        // Validate current step
+        const fields = getFieldsForStep(currentStep);
+        const isValid = await form.trigger(fields);
+
+        if (!isValid) {
+            console.log("Validation failed for step:", currentStep);
+            return;
+        }
+
+        if (currentStep === steps.length - 1) {
+            mutateCampaign(currentValues);
+        } else {
+            // Store current values before moving to next step
+            const newValues = form.getValues();
+            setCurrentStep((prev) => prev + 1);
+
+            // Ensure values are preserved after step change
+            setTimeout(() => {
+                form.reset({ ...newValues }, { keepDefaultValues: true });
+            }, 0);
+        }
+    };
+
+    const handlePrevious = () => {
+        const currentValues = form.getValues();
+        setCurrentStep((prev) => prev - 1);
+
+        // Ensure values are preserved when going back
+        setTimeout(() => {
+            form.reset({ ...currentValues }, { keepDefaultValues: true });
+        }, 0);
     };
 
     const handleDialogClose = (open: boolean) => {
         if (!open) {
             setCurrentStep(0);
             if (mode === "create") {
-                form.reset();
+                form.reset({
+                    name: "",
+                    description: "",
+                    targetAudience: undefined,
+                    isAutomated: false,
+                    startDate: undefined,
+                    endDate: undefined,
+                });
             }
         }
         setOpen(open);
@@ -494,7 +544,7 @@ export const CampaignCreationDialog = ({
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => setCurrentStep((prev) => prev - 1)}
+                                    onClick={handlePrevious}
                                     disabled={currentStep === 0}
                                 >
                                     Previous
