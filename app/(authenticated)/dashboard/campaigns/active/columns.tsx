@@ -52,7 +52,15 @@ export const columns: ColumnDef<CampaignColumn>[] = [
         cell: ({ row }) => {
             const value = row.getValue("status") as string;
             return (
-                <Badge variant={value === "ACTIVE" ? "default" :  value === "PAUSED" ? "destructive" : "outline"}>
+                <Badge
+                    variant={
+                        value === "ACTIVE"
+                            ? "default"
+                            : value === "PAUSED"
+                                ? "destructive"
+                                : "outline"
+                    }
+                >
                     {value}
                 </Badge>
             );

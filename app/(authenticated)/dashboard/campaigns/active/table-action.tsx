@@ -108,7 +108,7 @@ export const CampaignTableActions = ({
                                 currentStatus === "draft" || changeCampaignStatusIsPending
                             }
                         >
-                        Draft
+                            Draft
                         </DropdownMenuRadioItem>
                     </DropdownMenuRadioGroup>
                 </DropdownMenuContent>

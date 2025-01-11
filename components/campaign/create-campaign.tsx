@@ -206,48 +206,50 @@ export const CampaignCreationDialog = ({
                     </div>
                 );
 
-                case 1:
-    return (
-        <div className="space-y-4">
-            <FormField
-                control={form.control}
-                name="targetAudience"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Target Audience</FormLabel>
-                        <Select
-                            onValueChange={field.onChange}
-                            value={field.value || ""} // Add explicit empty string fallback
-                        >
-                            <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select target audience">
-                                        {field.value ? field.value.toLowerCase().replace('_', ' ') : 'Select target audience'}
-                                    </SelectValue>
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                <SelectItem value="HIGH_RISK">
-                                    High Risk Customers
-                                </SelectItem>
-                                <SelectItem value="MEDIUM_RISK">
-                                    Medium Risk Customers
-                                </SelectItem>
-                                <SelectItem value="LOW_RISK">
-                                    Low Risk Customers
-                                </SelectItem>
-                                <SelectItem value="ALL">All Customers</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <FormDescription>
-                            Choose the customer segment for this campaign.
-                        </FormDescription>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
-        </div>
-    );
+            case 1:
+                return (
+                    <div className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="targetAudience"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Target Audience</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value || ""} // Add explicit empty string fallback
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select target audience">
+                                                    {field.value
+                                                        ? field.value.toLowerCase().replace("_", " ")
+                                                        : "Select target audience"}
+                                                </SelectValue>
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="HIGH_RISK">
+                                                High Risk Customers
+                                            </SelectItem>
+                                            <SelectItem value="MEDIUM_RISK">
+                                                Medium Risk Customers
+                                            </SelectItem>
+                                            <SelectItem value="LOW_RISK">
+                                                Low Risk Customers
+                                            </SelectItem>
+                                            <SelectItem value="ALL">All Customers</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormDescription>
+                                        Choose the customer segment for this campaign.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                );
 
             case 2:
                 return (
