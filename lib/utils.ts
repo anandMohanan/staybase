@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { OrganizationSchema, TableOrganization, TableOrganizationSchema } from "./types/organization";
+import { CampaignFormValues } from "./types/campaign";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
@@ -144,3 +145,39 @@ export {
     calculateChurnProbability,
     calculateLifetimeValueTrend
 };
+
+export function calculatePriorityScore(campaign: Partial<CampaignFormValues>): number {
+	let score = 0;
+
+	// Base score by campaign type
+	const typeScores = {
+		ABANDONED_CART: 100,
+		WINBACK: 80,
+		REENGAGEMENT: 70,
+		LOYALTY_REWARD: 60,
+		PRODUCT_UPDATE: 50,
+		NEWSLETTER: 30,
+	};
+
+	if (campaign.type) {
+		score += typeScores[campaign.type];
+	}
+
+	// Adjust based on target audience
+	if (campaign.targetAudience) {
+		const audienceScores = {
+			HIGH_RISK: 30,
+			MEDIUM_RISK: 20,
+			LOW_RISK: 10,
+			ALL: 0,
+		};
+		score += audienceScores[campaign.targetAudience];
+	}
+
+	// Adjust based on automation
+	if (campaign.isAutomated) {
+		score += 10;
+	}
+
+	return Math.min(score, 100);
+}
