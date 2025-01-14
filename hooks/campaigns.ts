@@ -107,7 +107,10 @@ export const useDeleteCampaign = () => {
 export const useChangeCampaignStatus = () => {
     const { toast } = useToast();
     return useMutation({
-        mutationFn: async ({ campaignId, status }: { campaignId: string; status: string }) => {
+        mutationFn: async ({
+            campaignId,
+            status,
+        }: { campaignId: string; status: string }) => {
             const res = await changeCampaignStatus(campaignId, status.toUpperCase());
             if (!res.success) throw new Error(res.message);
         },
