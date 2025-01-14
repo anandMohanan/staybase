@@ -78,6 +78,27 @@
       "when": 1736189643960,
       "tag": "0010_short_psynapse",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1736842882179,
+      "tag": "0011_safe_stranger",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1736842948718,
+      "tag": "0012_naive_speed_demon",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1736842964393,
+      "tag": "0013_condemned_starbolt",
+      "breakpoints": true
     }
   ]
 }

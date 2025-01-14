@@ -1,0 +1,1 @@
+ALTER TABLE "campaigns" ADD COLUMN "status" "campaign_status" DEFAULT 'DRAFT' NOT NULL;
